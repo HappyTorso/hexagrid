@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+
+    <title>EaselJS Demo</title>
+    <script type="text/javascript" src="easel.js"></script>
+    <script type="text/javascript" src="tweenjs/Tween.js"></script>
+    <script type="text/javascript" src="tweenjs/Ease.js"></script>
+
+    <style type="text/css" media="screen">
+
+      #my_canvas{
+        background-color: #D6F5FF;
+        
+      }
+
+      #fps {
+        margin-top: 16px;
+        font-family: Verdana;
+        font-size: 10px;
+        color: #aaa;
+        height: 30px;
+      }
+    </style>
+    <script type="text/javascript">
+      var stage;
+
+      var triangle;
+      var radius = 25;
+      var stroke = 2;
+      var fill = 0x000000;
+      var alpha = 0.8;
+      var update = true;
+
+      
+      var side;
+      var inradius;
+      var counter = 0;
+
+      //TRIANGLE RECENTERING CALCULATIONS
+      var side = 1/((Math.sqrt(3)/3)*1/radius);
+      var inradius = side*(Math.sqrt(3)/6);
+      var triheight = side*(Math.sqrt(3)/2)
+
+      //COUNTER FOR ACTIVE TWEENS
+      var animcounter = 0;
+
+
+
+
+
+      function init(){
+        
+        setStage();
+
+
+        spawnGrid(vtiles, htiles);        
+
+        
+        console.log("Array is: "+triArray);
+
+        stage.update();
+        createjs.Ticker.setFPS(60);
+        createjs.Ticker.addListener(window);
+      }
+
+      function isEven(value) {
+       if (value%2 == 0)
+        return true;
+        else
+        return false;
+      }
+
+      function setStage(){
+        canvas = document.getElementById("my_canvas");
+        stage = new createjs.Stage(canvas);
+        stage.autoClear = true;
+
+        htiles = Math.ceil(canvas.width/(2*triheight));
+        vtiles = Math.ceil(canvas.height/(1.5*side)+1);
+
+         stage.enableMouseOver();
+
+
+        console.log("H tiles: "+htiles+" V tiles: "+vtiles);
+
+
+      }
+
+      function spawnFPS() {
+        document.getElementById("fps").innerText = Math.round(createjs.Ticker.getMeasuredFPS())+" fps";
+        }
+
+      function Triangle(radius,stroke,fill,alpha) {
+
+        graphics = new createjs.Graphics();
+        graphics.setStrokeStyle(stroke);
+        // graphics.beginStroke(createjs.Graphics.getRGB(255,255,255,alpha));
+        graphics.beginFill(createjs.Graphics.getRGB(fill,alpha));
+        graphics.drawPolyStar ( 0 , 0 , radius , 3 , 0 , -90 );
+        graphics.closePath();
+        triangle = new createjs.Shape(graphics);
+        createjs.Ticker.addListener(window);
+
+
+        return triangle;
+
+      }
+
+      function Hexagon (x,y,height) {
+
+        triArray = new Array();   //This array contains the triangles of the hexagon
+        var tri = new Triangle(radius,stroke,fill,alpha);
+        triArray.push(tri);
+
+        //Change the triangle center to the lower right corner
+        tri.regY = inradius-5;
+        tri.regX = side/2+1;
+
+        //Center the triangle on the hexagon center
+        tri.x = x;
+        tri.y = y;
+
+        //Initial rotation to make hexagon vertical
+        tri.rotation +=30;
+
+        for (var i = 5 - 1; i >= 0; i--) {
+            var newtri = this['triangle'+i] 
+            newtri = tri.clone();
+            newtri.rotation += 60*(i+1);
+            newtri.speed = Math.floor(Math.random()*500)
+
+            triArray.push(newtri)
+
+        };
+
+        for (var i = triArray.length - 1; i >= 0; i--) {
+
+          // triArray[i].onTick = function () {
+          //     this.x+=this.speed
+          //   }
+
+          stage.addChild(triArray[i])
+
+            
+          triArray[i].onMouseOver = pressHandler;
+
+         }; 
+
+      }
+      
+
+      function tick(){
+    
+        spawnFPS();
+        
+      if(!update){
+          stage.update(); 
+        }
+      }
+
+      function spawnGrid (rows,columns){
+
+        for (var r = rows - 1; r >= 0; r--) {
+          for (var c = columns - 1; c >= 0; c--) {
+             var hexArray = new Array() ;
+              hexArray.push(new Hexagon(c*triheight*2+(isEven(r) ? 0 : triheight), r*side*1.5));
+          };
+         
+
+        };
+
+      }
+
+function pressHandler(e){
+    var myTarget = e.target;
+    // createjs.Tween.get(e.target).to({x:100},1000);
+    update = false;
+    animcounter++
+    var tween = createjs.Tween.get(myTarget).to({rotation:360, alpha:0, visible:false},1000).call(stopUpdate);
+    console.log(e.target instanceof createjs.DisplayObject)
+
+    }
+
+function stopUpdate() {
+  animcounter--
+  
+  if(animcounter==0){  
+    update = true
+  }
+
+  }
+
+
+
+    </script>
+    </head>
+    <body onload="javascript:init();">
+    <div>  
+     <canvas width="1280" heigh="113" id="my_canvas"></canvas>
+    </div>
+    <div id="fps"></div>
+    </body>
+    </html>

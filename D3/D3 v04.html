@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+
+    <title>D3 TEST</title>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+
+    <script src="js/d3.v2.js"></script>
+
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+
+
+
+
+    <script type="text/javascript">
+	
+	data = new Array();
+
+  //GLOBAL WIRABLE VARS
+      var debugmode = false;
+
+      var radius = 13;
+      var stroke = 2;
+      var on_color = "#000000";
+      var off_color = "#D6F5FF";
+      var alpha = 1;
+      var update = true;
+
+
+      var svgheight = 113 //HEIGHT OF THE SVG TO DRAW 
+      var side;
+      var inradius;
+      var counter = 0;
+
+      var litArray = new Array() //CONTAINS COORDINATES OF LIT TRIANGLES
+
+      
+
+      //TRIANGLE RECENTERING CALCULATIONS
+      var side = 1/((Math.sqrt(3)/3)*1/radius);
+      var inradius = side*(Math.sqrt(3)/6);
+      var triheight = side*(Math.sqrt(3)/2)
+
+      var hexArray = new Array();
+      var randomProperties = new Array();
+
+      var triArray = [[0,0],[side,0],[side/2,triheight]]
+      var triangle_vertices = triArray.join("L");
+
+
+
+
+  function isEven(value) {
+       if (value%2 == 0)
+        return true;
+        else
+        return false;
+      }
+
+
+
+    function init() {
+    console.log("Initializing")
+    // testTriangles();
+    setSVG();
+    spawnGrid(vtiles,htiles);
+    calcVars();
+    initPositions();
+
+
+    }
+
+
+
+    function setSVG() {
+
+        $("body").prepend("<svg width='"+$(window).width()+"' height='"+svgheight+"' id='my_svg'>")
+
+        htiles = Math.ceil($("#my_svg").width()/(2*triheight)+1);
+        vtiles = Math.ceil(svgheight/(1.5*side));
+
+        console.log("H tiles: "+htiles+" V tiles: "+vtiles);
+
+
+      
+    }
+
+    function spawnGrid (rows,columns){
+
+        for (var r = rows - 1; r >= 0; r--) {
+          for (var c = columns - 1; c >= 0; c--) {
+            for (var ix = 6 - 1; ix >= 0; ix--) {
+              hexArray.push({x: c*triheight*2+(isEven(r) ? 0 : triheight), y: r*side*1.5, rot:60*ix+30, color:checkBlack(r,c,ix), row:r, column:c, idx:ix}); 
+            };
+          };
+         
+        };
+        
+       }
+
+    function checkBlack(r,c,i) {
+      // if (r===1 && c>7 && i===2) {
+      //   // console.log(hexArray[i]['color'])
+      //   return on_color;
+      // } else{
+      //   return off_color;
+      // };
+      return off_color;
+
+     
+    }
+
+
+    function randomHexColor() {
+        var letters = '0123456789ABCDEF'.split('');
+        var color = '#';
+        for (var i = 0; i < 6; i++ ) {
+          color += letters[Math.round(Math.random() * 15)];
+        }
+      return color;
+    }
+
+    function calcVars() {
+     
+      for (var i=hexArray.length - 1; i >= 0; i--) {
+        randomProperties.push({
+        x:$(window).width()+5*side,
+        y:Math.random()*(svgheight+100)-100,
+        rot:Math.random()*(360*4), 
+        scale:Math.random()*5,
+        color: hexArray[i]['color'],
+        row:hexArray[i]['row'],
+        column:hexArray[i]['column'],
+        idx:hexArray[i]['idx']
+
+      })
+
+      }
+
+    }
+
+    function Animate() {
+     d3.select("svg").selectAll(".path")
+      .data(hexArray)
+      .transition()
+      .ease("back-out")
+      .duration(function(){return Math.random()*2000+300})
+      .delay(function(d,i){return 5*d.x})
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ") rotate("+d.rot+")"; })
+    }
+
+    function initPositions () {
+      d3.select("body svg").selectAll()
+      .data(randomProperties)
+      .enter().append("path")
+      .attr("class","path")
+      .attr("d", "M" + triangle_vertices + "Z" )
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ") rotate("+d.rot+") scale("+d.scale+")"; })
+      .attr("style", function(d){return "fill:"+d.color;})
+      .property("row", function(d) {return d.row})
+      .property("column", function(d) {return d.column})
+      .property("idx", function(d) {return d.idx})
+      .on("click", function () { toggleColor(this) })  
+
+    }
+
+    function toggleColor(tg) {
+      var cl = d3.select(tg).attr("style").slice(5,12)
+      if(cl!=on_color) { 
+        d3.select(tg).attr("style", "fill:"+on_color); 
+        litArray.push({row:tg.row, column:tg.column, idx:tg.idx});
+        console.log("pushing: "+tg.idx)
+      }else{
+        d3.select(tg).attr("style", "fill:"+off_color);
+          litArray.forEach(function (element) {
+            if(element.row === tg.row && element.column === tg.column && element.idx === tg.idx) {
+              litArray.splice(litArray.indexOf(element),1)
+              console.log("splicing: "+tg.idx)
+
+            }
+          })
+        }
+    }
+
+    
+
+
+    </script>
+
+
+
+    <body onload="javascript:init();">
+
+    <strong> <a href="#" id="reinit" onClick="javascript:Animate()">RETEST</a></strong>
+
+    </body>
+</HTML>

@@ -1,0 +1,205 @@
+body {
+	font-size: 12px;
+	padding: 16px;
+	margin: 0px;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+#wrapper {
+}
+
+#canvasoverlay {
+	top: -56px;
+	padding: 16px;
+	position: relative;
+	text-align: right;
+}
+
+#canvaswrapper {
+		padding: 0;
+		overflow:hidden;
+	}
+
+#sliderpanels {
+	width: 450px;
+}
+
+
+	h1 {
+	font-size: 2.56em;
+	color: #010730;
+	margin-bottom: 8px;
+	text-transform: uppercase;
+	}
+
+	h2 {
+	font-size: 1.2em;
+	color: #444;
+	margin-top: 0px;
+	font-weight: 100;
+
+	}
+	sup {
+		text-transform: none;
+		font-size: 0.4em;
+
+	}
+header {
+	margin-bottom: 30px;
+}
+a {
+	color:#1c6bca ;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+#my_canvas{
+        background: #FFFFFF;
+        
+      }
+
+
+#fps {
+        margin-top: 16px;
+        font-family: Verdana;
+        font-size: 10px;
+        color: #aaa;
+        height: 30px;
+      }
+
+.k-content {
+	float: left;
+	width: 700px;
+
+}
+
+
+
+.console {
+	width: 100%;
+	height: 100px;
+	overflow: hidden;
+	border-top: 1px #ccc solid;
+	padding: 4px;
+	position: fixed;
+	bottom: 0px;
+	display: none;
+
+}
+
+.label {
+	text-align: center;
+}
+
+.slider {
+	margin-bottom: 20px;
+	clear: both;
+
+}
+
+.sliderwrapper {
+	display: inline-block;
+}
+
+
+#colorpicker {
+	display: inline-block;
+	margin-top: -200px;
+	margin-left: -16px;
+}
+
+#color {
+	display: none;
+}
+
+#randombutton {
+	display: inline-block;
+
+}
+
+#downloadbtn {
+background: #222222; /* Old browsers */
+background: -moz-linear-gradient(top,  #222222 0%, #444444 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#222222), color-stop(100%,#444444)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top,  #222222 0%,#444444 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top,  #222222 0%,#444444 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top,  #222222 0%,#444444 100%); /* IE10+ */
+background: linear-gradient(to bottom,  #222222 0%,#444444 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#222222', endColorstr='#444444',GradientType=0 ); /* IE6-9 */
+
+color: #FFFFFF;
+}
+
+#downloadbtn {
+	width: 100%;
+	margin-top: 16px;
+
+}
+
+#downloadbtn:hover {
+	background: #333333; /* Old browsers */
+	background: -moz-linear-gradient(top,  #333333 0%, #777777 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#333333), color-stop(100%,#777777)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #333333 0%,#777777 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #333333 0%,#777777 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #333333 0%,#777777 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  #333333 0%,#777777 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#333333', endColorstr='#777777',GradientType=0 ); /* IE6-9 */
+
+	color: #ffffff;
+}
+
+.controlpanel {
+	display: inline-block;
+	width: 260px;
+	text-align: left;
+	margin-top: 20px;
+}
+
+.controlpanel label {
+	display: block;
+	margin-bottom: 6px;
+	text-align: left;
+}
+
+#colorpanel {
+	width:220px;
+}
+
+.checkholder span,
+.checkholder label
+ {
+	display: inline-block;;
+	
+}
+
+.checkholder label {
+	margin-right: 16px;
+}
+
+#sizepanel {
+	width: 150px;
+}
+
+#fps {
+	display: none;
+}
+
+#hexacontrols {
+	padding:16px; 
+	margin-top: -50px;
+}
+
+#retile {
+	padding: 2px 4px;
+	background-color: #D6F5FF;
+}
+#retile:hover {
+	background-color: #000000;
+	color: #FFFFFF;
+}
+
+

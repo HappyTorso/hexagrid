@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+
+    <title>D3 TEST</title>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+
+    <script src="js/d3.v2.js"></script>
+
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+  <script type="text/javascript" src="js/specarray.js"></script>
+
+
+
+
+
+
+    <script type="text/javascript">
+
+	
+	data = new Array();
+
+  //GLOBAL WIRABLE VARS
+      var debugmode = false;
+
+      var radius = 13;
+      var stroke = 2;
+      var on_color = "#000000";
+      var off_color = "#D6F5FF";
+      var alpha = 1;
+      var update = true;
+
+
+      var svgheight = 113 //HEIGHT OF THE SVG TO DRAW 
+      var side;
+      var inradius;
+      var counter = 0;
+
+      var litArray = new Array() //CONTAINS COORDINATES OF LIT TRIANGLES
+
+      
+
+      //TRIANGLE RECENTERING CALCULATIONS
+      var side = 1/((Math.sqrt(3)/3)*1/radius);
+      var inradius = side*(Math.sqrt(3)/6);
+      var triheight = side*(Math.sqrt(3)/2)
+
+      var hexArray = new Array();
+      var randomProperties = new Array();
+      var myList = [];
+
+      var triArray = [[0,0],[side,0],[side/2,triheight]]
+      var triangle_vertices = triArray.join("L");
+
+      IECompat(); //MAKE INDEXOF COMPATIBLE WITH IE
+
+
+
+
+  function isEven(value) {
+       if (value%2 == 0)
+        return true;
+        else
+        return false;
+      }
+
+
+
+    function init() {
+    console.log("Initializing")
+    // testTriangles();
+    setSVG();
+    spawnGrid(vtiles,htiles);
+    setLitTriangles();
+    calcVars();
+    initPositions();
+
+
+    }
+
+
+
+    function setSVG() {
+
+        $("body").prepend("<svg width='"+$(window).width()+"' height='"+svgheight+"' id='my_svg'>")
+
+        htiles = Math.ceil($("#my_svg").width()/(2*triheight)+1);
+        vtiles = Math.ceil(svgheight/(1.5*side));
+
+        console.log("H tiles: "+htiles+" V tiles: "+vtiles);
+
+
+      
+    }
+
+    function spawnGrid (rows,columns){
+
+        for (var r = rows - 1; r >= 0; r--) {
+          for (var c = columns - 1; c >= 0; c--) {
+            for (var ix = 6 - 1; ix >= 0; ix--) {
+              hexArray.push({x: c*triheight*2+(isEven(r) ? 0 : triheight), y: r*side*1.5, rot:60*ix+30, row:r, column:c, idx:ix, color:off_color}); 
+            };
+          };
+         
+        };
+        
+       }
+
+    function setLitTriangles () {
+
+      specArray.forEach( function (item) {
+
+          var selected = hexArray.filter(function (el) {
+            return el.row === item.row &&
+            el.column === item.column &&
+            el.idx === item.idx
+          })[0];
+
+          selected.color = on_color;
+          // console.log(selected);
+        
+
+      })
+
+    }
+
+
+
+    function randomHexColor() {
+        var letters = '0123456789ABCDEF'.split('');
+        var color = '#';
+        for (var i = 0; i < 6; i++ ) {
+          color += letters[Math.round(Math.random() * 15)];
+        }
+      return color;
+    }
+
+    function calcVars() {
+
+        hexArray.forEach(function (item) {
+          randomProperties.push({
+            x:$(window).width()+5*side,
+            y:Math.random()*(svgheight+100)-100,
+            rot:Math.random()*(360*4), 
+            scale:Math.random()*5,
+            color: item['color'],
+            row:item['row'],
+            column:item['column'],
+            idx:item['idx']
+          })
+
+        })
+
+    }
+
+
+    function Animate() {
+     d3.select("svg").selectAll(".path")
+      .data(hexArray)
+      .transition()
+      .ease("back-out")
+      .duration(function(){return Math.random()*2000+300})
+      .delay(function(d,i){return 5*d.x})
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ") rotate("+d.rot+")"; })
+    }
+
+    function initPositions () {
+      d3.select("body svg").selectAll()
+      .data(randomProperties)
+      .enter().append("path")
+      .attr("class","path")
+      .attr("d", "M" + triangle_vertices + "Z" )
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ") rotate("+d.rot+") scale("+d.scale+")"; })
+      .attr("style", function(d){return "fill:"+d.color;})
+      .property("row", function(d) {return d.row})
+      .property("column", function(d) {return d.column})
+      .property("idx", function(d) {return d.idx})
+      .on("click", function () { 
+        toggleColor(this) 
+      })  
+
+    }
+
+    function toggleColor(tg) {
+      var cl = d3.select(tg).attr("style").slice(5,12)
+      if(cl!=on_color) { 
+        d3.select(tg).attr("style", "fill:"+on_color); 
+        litArray.push({row:tg.row, column:tg.column, idx:tg.idx});
+        // console.log("pushing: "+tg.idx)
+      }else{
+        d3.select(tg).attr("style", "fill:"+off_color);
+          litArray.forEach(function (element) {
+            if(element.row === tg.row && element.column === tg.column && element.idx === tg.idx) {
+              litArray.splice(litArray.indexOf(element),1)
+              // console.log("splicing: "+tg.idx)
+
+            }
+          })
+        }
+    }
+
+
+    function PrintArray () {
+      litArray.forEach(function (item) {
+        console.log("{row:"+item.row+", column:"+item.column+", idx:"+item.idx+"},");
+      })
+    }
+
+
+    function IECompat () {
+      if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
+        "use strict";
+        if (this == null) {
+            throw new TypeError();
+        }
+        var t = Object(this);
+        var len = t.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        var n = 0;
+        if (arguments.length > 1) {
+            n = Number(arguments[1]);
+            if (n != n) { // shortcut for verifying if it's NaN
+                n = 0;
+            } else if (n != 0 && n != Infinity && n != -Infinity) {
+                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+            }
+        }
+        if (n >= len) {
+            return -1;
+        }
+        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+        for (; k < len; k++) {
+            if (k in t && t[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+      }
+    }
+  }
+
+    
+
+
+    </script>
+
+
+
+    <body onload="javascript:init();">
+
+    <strong> <a href="#" id="reinit" class="action" onClick="javascript:Animate()">RETEST</a></strong>
+    <strong> <a href="#" id="print" class="action" onClick="javascript:PrintArray()">PRINT</a></strong>
+
+    </body>
+</HTML>

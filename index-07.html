@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+
+    <title>Hexagrid v07 - Sin and Cos</title>
+
+    <!-- STYLESHEETS -->
+    <link href="css/mainv07.css" rel="stylesheet">
+
+
+    <!-- EASEL SCRIPTS -->
+    <script type="text/javascript" src="js/easel.js"></script>
+    <script type="text/javascript" src="js/Tween.js"></script>
+    <script type="text/javascript" src="js/Ease.js"></script>
+    <script type="text/javascript" src="js/ColorFilter.js"></script>
+
+
+
+      
+    <script type="text/javascript">
+      var stage;
+
+      var triangle;
+      
+      //GLOBAL WIRABLE VARS
+      var debugmode = false;
+
+      var radius = 13;
+      var stroke = 2;
+      var fillon = 0x000000;
+      var filloff = 0xD6F5FF;
+      var alpha = 1;
+      var update = true;
+
+
+      
+      var side;
+      var inradius;
+      var counter = 0;
+
+      //TRIANGLE RECENTERING CALCULATIONS
+      var side = 1/((Math.sqrt(3)/3)*1/radius);
+      var inradius = side*(Math.sqrt(3)/6);
+      var triheight = side*(Math.sqrt(3)/2)
+
+      //COUNTER FOR ACTIVE TWEENS
+      var animcounter = 0;
+
+      //BITMAP TO SPECIFY WHICH TRIANGLES TO FILL
+      var logo = new createjs.Bitmap("img/Logo.png");
+
+
+
+      function setOverlayCanvas() {
+        o_canvas = document.getElementById("overlay_canvas");
+        stage2 = new createjs.Stage(o_canvas);
+
+
+        stage2.addChild(logo);        
+        stage2.update()
+      }
+
+      function init(){
+
+        var cv = document.getElementsByTagName('canvas')[0].width;
+        cv.width  = window.innerWidth;
+        
+        
+        if(stage){
+          stage.removeAllChildren();
+        };
+
+        setStage();
+        setOverlayCanvas();
+
+        spawnGrid(vtiles, htiles);        
+
+        console.log("Array is: "+triArray);
+
+        stage.update();
+        createjs.Ticker.setFPS(60);
+        createjs.Ticker.addListener(window);
+      }
+
+      function isEven(value) {
+       if (value%2 == 0)
+        return true;
+        else
+        return false;
+      }
+
+      function setStage(){
+        canvas = document.getElementById("my_canvas");
+        stage = new createjs.Stage(canvas);
+        stage.autoClear = true;
+
+        htiles = Math.ceil(canvas.width/(2*triheight)+1);
+        vtiles = Math.ceil(canvas.height/(1.5*side)+1);
+
+        stage.enableMouseOver();
+
+
+        console.log("H tiles: "+htiles+" V tiles: "+vtiles);
+
+
+      }
+
+      function spawnFPS() {
+        document.getElementById("fps").innerText = Math.round(createjs.Ticker.getMeasuredFPS())+" fps";
+        }
+
+    
+
+      function Triangle(radius,stroke,alpha,lit) {
+        graphics = new createjs.Graphics();
+        // graphics.setStrokeStyle(stroke);
+        // graphics.beginStroke(createjs.Graphics.getRGB(255,255,255,alpha));
+        // !lit ? alpha=0.5 : null;
+        graphics.beginFill(createjs.Graphics.getRGB(lit ? fillon : filloff,alpha));
+        graphics.drawPolyStar ( 0 , 0 , radius , 3 , 0 , -90 );
+        graphics.closePath();
+
+
+        return graphics;
+
+      }
+
+     
+
+      function drawCenter(x,y) {
+        var r = new createjs.Graphics();
+        r.beginFill(createjs.Graphics.getRGB(0xFF0000))
+        r.drawCircle ( x , y , 1 )
+        r.endFill();
+        var center = new createjs.Shape(r);
+        stage.addChild(center);
+
+      }
+
+      function checkOverlap(x,y) {
+        var x = Math.round(x);
+        var y = Math.round(y);      
+        var ctx = document.getElementById('overlay_canvas').getContext('2d')
+        var pix = ctx.getImageData(x, y, 1, 1).data;
+        // console.log(pix[3]+" @  "+x+":"+y);
+        
+        if(pix[3]==0) {
+          return false;
+        }else{
+          return true;
+        }
+      }
+
+      function Hexagon (x,y,height) {
+
+        triArray = new Array();   //This array contains the triangles of the hexagon
+
+
+        for (var i = 6 - 1; i >= 0; i--) {
+        tri = new createjs.Shape();
+
+        triArray.push(tri);
+
+        //Change the triangle center to the lower right corner
+        tri.regY = inradius;
+        tri.regX = side/2;
+
+        //Center the triangle on the hexagon center
+        tri.x = finalX = x;
+        tri.y = finalY = y;
+
+        var startX = +1400;
+        var startY = Math.random()*(document.getElementById("my_canvas").height+50)-50
+        iscaleX = Math.random()*5;
+        iscaleY = Math.random()*5;
+
+
+
+
+
+        //Initial rotation to make hexagon vertical
+        finalRot = tri.rotation += 60*(i+1)+30;
+        tri.speed = Math.floor(Math.random()*3000+tri.x*2)
+
+        var tricenter = tri.localToGlobal(tri.regX-side/2,tri.regY-inradius);
+
+        debugmode ? drawCenter(tricenter.x,tricenter.y) : null;
+
+        tri.graphics = Triangle(radius,stroke,alpha,checkOverlap (tricenter.x,tricenter.y));
+
+        ctn.addChild(tri);  
+        tri.scaleX = iscaleX;
+        tri.scaleY = iscaleY;
+        tri.x = startX;
+        tri.y = startY;
+        tri.rotation+=Math.random()*(360*4);
+        tri.alpha = 0;
+        update = false;
+        animcounter++
+
+        var tweenX = createjs.Tween.get(tri).wait(tri.speed).to({x:finalX, y:finalY, scaleX:1, scaleY:1, rotation:finalRot, alpha:1},1000,createjs.Ease.backOut).call(stopUpdate)
+
+        tri.onClick = pressHandler;
+
+        };
+
+
+      }
+      
+
+      function tick(){
+    
+        spawnFPS();
+        
+      !update ? stage.update() : null; 
+          
+        
+      }
+
+      function spawnGrid (rows,columns){
+
+        ctn = new createjs.Container()
+
+
+        for (var r = rows - 1; r >= 0; r--) {
+          for (var c = columns - 1; c >= 0; c--) {
+             var hexArray = new Array() ;
+              hexArray.push(new Hexagon(c*triheight*2+(isEven(r) ? 0 : triheight), r*side*1.5));
+          };
+         
+        };
+
+        stage.addChild(ctn);
+
+        //DISPLAY NUMBER OF POLYGONS
+        document.getElementById("polygons").innerText = ctn.children.length + " polygons @";
+
+
+
+      }
+
+function pressHandler(e){
+    var myTarget = e.target;
+
+    if(e.target.graphics.alpha<1) {
+        var tga = e.target.graphics.alpha=1 
+        } else { 
+        var tga = e.target.graphics.alpha=0.1
+        }
+
+    update = false;
+    animcounter++
+    var tween = createjs.Tween.get(myTarget).to({alpha:tga},300).call(stopUpdate);
+    }
+
+ function getFilter(instance) {
+
+      }
+
+function stopUpdate() {
+  animcounter--
+  
+  if(animcounter==0){  
+    update = true
+  }
+
+  }
+
+
+
+    </script>
+    </head>
+    <body onload="javascript:init();">
+    <div>  
+     <canvas width="1280" height="113" id="my_canvas"></canvas>
+     <canvas width="1280" height="113" id="overlay_canvas"></canvas>
+    </div>
+   <strong> <a href="#" id="reinit" onClick="init()">ϟ RETEST</a></strong>
+    <div id="polygons"></div>
+    <div id="fps"></div>
+    <div class="info">by <a href="http://twitter.com/HappyTorso" target="blank">@HappyTorso</a> - <a href="http://flakesix.com" target="blank">flakesix.com</a></div>
+    </body>
+    </html>

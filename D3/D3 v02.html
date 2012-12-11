@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+
+    <title>D3 TEST</title>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+
+    <script src="js/d3.v2.js"></script>
+
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+
+
+
+
+    <script type="text/javascript">
+	
+	data = new Array();
+
+  //GLOBAL WIRABLE VARS
+      var debugmode = false;
+
+      var radius = 13;
+      var stroke = 2;
+      var fillon = 0x000000;
+      var filloff = 0xD6F5FF;
+      var alpha = 1;
+      var update = true;
+
+
+      var svgheight = 113 //HEIGHT OF THE SVG TO DRAW 
+      var side;
+      var inradius;
+      var counter = 0;
+
+      //TRIANGLE RECENTERING CALCULATIONS
+      var side = 1/((Math.sqrt(3)/3)*1/radius);
+      var inradius = side*(Math.sqrt(3)/6);
+      var triheight = side*(Math.sqrt(3)/2)
+
+      var hexArray = new Array();
+      var randomProperties = new Array();
+
+
+
+
+  function isEven(value) {
+       if (value%2 == 0)
+        return true;
+        else
+        return false;
+      }
+
+
+
+    function init() {
+    console.log("Initializing")
+    // testTriangles();
+    setSVG();
+    spawnGrid(vtiles,htiles);
+    calcVars();
+    initPositions();
+
+    }
+
+    function testTriangles(){
+
+    for (var i = 1020 - 1; i >= 0; i--) {
+      data.push({x:Math.random()*1280,y:Math.random()*113})
+    };
+
+    d3.select("#mysvg").selectAll(".point")
+      .data(data)
+      .enter().append("path")
+      .attr("class", "point")
+      .attr("d", d3.svg.symbol().type("triangle-up"))
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+    }
+
+    function setSVG() {
+
+        $("body").append("<svg width='"+$(window).width()+"' height='"+svgheight+"' id='my_svg'>")
+
+        htiles = Math.ceil($("#my_svg").width()/(2*triheight)+1);
+        vtiles = Math.ceil($("#my_svg").height()/(1.5*side)+1);
+
+
+        console.log("H tiles: "+htiles+" V tiles: "+vtiles);
+
+
+      
+    }
+
+    function spawnGrid (rows,columns){
+      console.log("hexArray"+hexArray);
+
+        for (var r = rows - 1; r >= 0; r--) {
+          for (var c = columns - 1; c >= 0; c--) {
+              hexArray.push({x: c*triheight*2+(isEven(r) ? 0 : triheight), y: r*side*1.5});
+          };
+         
+        };
+
+        //DRAW CIRCLES AT HEX CENTERS
+
+        triArray = [[0,0],[side,0],[side/2,triheight]]
+        var joined = triArray.join("L");
+
+
+        for (var i = 6 - 1; i >= 0; i--) {         
+        var rot = 60*i+30;        
+        d3.select("body svg").selectAll()
+          .data(hexArray)
+          .enter().append("path")
+          .attr("class","path")
+          .attr("d", "M" + joined + "Z" )
+          .attr("finaltransform", function(d) { return "translate(" + d.x+ "," + d.y + ") rotate("+rot+")"; })
+          ;
+         };
+       }
+
+    function randomHexColor() {
+        var letters = '0123456789ABCDEF'.split('');
+        var color = '#';
+        for (var i = 0; i < 6; i++ ) {
+          color += letters[Math.round(Math.random() * 15)];
+        }
+      return color;
+    }
+
+    function calcVars() {
+     
+      for (var i=$(".path").length - 1; i >= 0; i--) {
+        randomProperties.push({
+        x:$(window).width()+2*side,
+        y:Math.random()*(svgheight+50)-50,
+        rot:Math.random()*(360*4), 
+        scale:Math.random()*5,
+        color:randomHexColor()
+      })
+
+      }
+
+    }
+
+    function Animate() {
+      d3.select("svg").selectAll(".path")
+      .transition()
+      .duration(750)
+      .attr("transform", console.log(d3.select("svg").selectAll(".path").node))
+      
+    }
+
+    function initPositions () {
+      d3.select("svg").selectAll(".path")
+      .data(randomProperties)
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ") rotate("+d.rot+") scale("+d.scale+")"; })
+      .attr("style", function(d){return "fill:"+d.color;})   
+    }
+
+    function Hexagon (x,y) {
+
+        triArray = new Array();   //This array contains the triangles of the hexagon
+
+        for (var i = 6 - 1; i >= 0; i--) {
+
+        triArray.push(tri);
+
+        //Change the triangle center to the lower right corner
+        tri.regY = inradius;
+        tri.regX = side/2;
+
+        //Center the triangle on the hexagon center
+        tri.x = finalX = x;
+        tri.y = finalY = y;
+
+        var startX = +1400;
+        var startY = Math.random()*(document.getElementById("my_canvas").height+50)-50
+        iscaleX = Math.random()*5;
+        iscaleY = Math.random()*5;
+
+
+
+
+
+        //Initial rotation to make hexagon vertical
+        finalRot = tri.rotation += 60*(i+1)+30;
+        tri.speed = Math.floor(Math.random()*3000+tri.x*2)
+
+        var tricenter = tri.localToGlobal(tri.regX-side/2,tri.regY-inradius);
+
+        debugmode ? drawCenter(tricenter.x,tricenter.y) : null;
+
+        tri.graphics = Triangle(radius,stroke,alpha,checkOverlap (tricenter.x,tricenter.y));
+
+        ctn.addChild(tri);  
+        tri.scaleX = iscaleX;
+        tri.scaleY = iscaleY;
+        tri.x = startX;
+        tri.y = startY;
+        tri.rotation+=Math.random()*(360*4);
+        tri.alpha = 0;
+        update = false;
+        animcounter++
+
+        var tweenX = createjs.Tween.get(tri).wait(tri.speed).to({x:finalX, y:finalY, scaleX:1, scaleY:1, rotation:finalRot, alpha:1},1000,createjs.Ease.backOut).call(stopUpdate)
+
+        tri.onClick = pressHandler;
+
+        };
+
+
+      }
+
+
+     function Triangle(radius,stroke,alpha,lit) {
+        graphics = new createjs.Graphics();
+        graphics.beginFill(createjs.Graphics.getRGB(lit ? fillon : filloff,alpha));
+        graphics.drawPolyStar ( 0 , 0 , radius , 3 , 0 , -90 );
+        graphics.closePath();
+
+
+        return graphics;
+
+      }
+
+
+    </script>
+
+
+
+    <body onload="javascript:init();">
+
+    <strong> <a href="#" id="reinit" onClick="javascript:Animate()">RETEST</a></strong>
+
+    </body>
+</HTML>

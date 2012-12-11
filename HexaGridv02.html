@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+    <html>
+    <head> 
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=740" /> 
+
+    <title>// HexaGrid v0.1a - by @HappyTorso - flakesix.com</title>
+
+
+    <!-- STYLESHEETS -->
+    <link rel="stylesheet" href="css/kendo.common.css">
+    <link rel="stylesheet" href="css/kendo.uniform.min.css">
+    <link href="css/main02_2.css" rel="stylesheet">
+    <!-- <link rel='stylesheet' media='screen and (min-width: 100px) and (max-width: 900px)' href='css/smaller.css' /> -->
+
+
+    <!-- TYPEKIT --> 
+    <script type="text/javascript" src="//use.typekit.net/tlh0rrx.js"></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+  
+    
+
+
+   <!-- CDN-based script reference for jQuery; utilizing a local reference if offline -->
+    <script src="js/jquery.min.js"></script>
+
+    <!-- CDN-based script reference for Kendo UI DataViz; utilizing a local reference if offline -->
+    <script src="js/kendo.web.min.js"></script>
+
+
+    <!-- EASEL SCRIPTS -->
+    <script type="text/javascript" src="js/easel.js"></script>
+    <script type="text/javascript" src="js/Tween.js"></script>
+    <script type="text/javascript" src="js/Ease.js"></script>
+    <script type="text/javascript" src="js/console.js"></script>
+
+    <!-- COLOR PICKER -->
+    <script type="text/javascript" src="js/farbtastic.js"></script>
+    <link rel="stylesheet" href="js/farbtastic.css" type="text/css" />
+
+    <!--CANVAS2IMAGE -->
+    <script type="text/javascript" src="js/canvas2image.js"></script>
+    <script type="text/javascript" src="js/base64.js"></script>
+
+
+
+      
+    <script type="text/javascript">
+      var stage;
+      var triangle;
+
+      //WIRED PARAMETERS
+      var radius = 20;
+      var stroke = 2;
+      var fill = 0xBD2E93;
+      var alpha = 0.5;
+      var xcomp = 0;
+      var ycomp = 0;
+      var sides = 3;
+
+      var update = true;
+      
+      var side;
+      var inradius;
+      var counter = 0;
+
+      //SIZE FOR CANVAS IMAGE SAVING
+      var imagewidth = 1000;
+      var imageheight = 1000;
+       
+
+      //TRIANGLE RECENTERING CALCULATIONS
+      var side = 1/((Math.sqrt(3)/3)*1/radius);
+      var inradius = side*(Math.sqrt(3)/6);
+      var triheight = side*(Math.sqrt(3)/2)
+
+      //COUNTER FOR ACTIVE TWEENS
+      var animcounter = 0;
+      $(document).ready(function() {spawnCanvas()})
+      $(window).resize(function(e) {spawnCanvas()})
+     
+
+      //SPAWN CANVAS
+      function spawnCanvas() {
+          $("#canvaswrapper").empty();
+          $('#canvaswrapper').append("<canvas width='"+($("#canvaswrapper").innerWidth()) +"' height='"+$(window).innerHeight()/2+"' id='my_canvas'>")
+          console.log("canvaswrapper width: "+$("#canvaswrapper").innerWidth())
+          console.log("my_canvas width: "+$("#my_canvas").innerWidth())
+
+          init();
+      }
+      
+
+
+      //RETILE GRID
+      function preInit() {
+         side = 1/((Math.sqrt(3)/3)*1/radius);
+        inradius = side*(Math.sqrt(3)/6);
+          triheight = side*(Math.sqrt(3)/2)
+      }
+
+      function init(){
+       
+
+        if(document.getElementById("gridcheck").checked){
+          preInit();
+        }
+
+        if(stage){
+          stage.removeAllChildren();
+        };
+
+        setStage();
+        spawnGrid(vtiles, htiles);        
+
+        console.log("Array is: "+triArray);
+
+        createjs.Ticker.setFPS(60);
+        createjs.Ticker.addListener(window);
+        stage.update();
+
+      }
+
+      function isEven(value) {
+       if (value%2 == 0)
+        return true;
+        else
+        return false;
+      }
+
+      function setStage(){
+
+        canvas = document.getElementById("my_canvas");
+        stage = new createjs.Stage(canvas);
+        
+        stage.autoClear = true;
+
+        htiles = Math.ceil(canvas.width/(2*triheight)+1);
+        vtiles = Math.ceil(canvas.height/(1.5*side)+1);
+
+         stage.enableMouseOver();
+
+
+        console.log("H tiles: "+htiles+" V tiles: "+vtiles);
+
+
+      }
+
+      function spawnFPS() {
+        document.getElementById("fps").innerText = Math.round(createjs.Ticker.getMeasuredFPS())+" fps";
+        }
+
+      function Triangle(radius,sides,stroke,fill,alpha) {
+
+        graphics = new createjs.Graphics();
+        graphics.setStrokeStyle(stroke);
+        // graphics.beginStroke(createjs.Graphics.getRGB(255,255,255,alpha));
+        graphics.beginFill(createjs.Graphics.getRGB(fill,alpha));
+        graphics.drawPolyStar ( 0 , 0 , radius , sides , 0 , -90 );
+        graphics.closePath();
+        triangle = new createjs.Shape(graphics);
+
+
+        return triangle;
+
+      }
+
+      function Hexagon (x,y,height) {
+
+        triArray = new Array();   //This array contains the triangles of the hexagon
+        var tri = new Triangle(radius,sides,stroke,fill,alpha);
+        triArray.push(tri);
+
+        //Change the triangle center to the lower right corner
+        tri.regY = inradius+xcomp;
+        tri.regX = side/2+ycomp;
+
+        //Center the triangle on the hexagon center
+        tri.x = x;
+        tri.y = y;
+
+        //Initial rotation to make hexagon vertical
+        tri.rotation +=30;
+
+        for (var i = 5 - 1; i >= 0; i--) {
+            var newtri = this['triangle'+i] 
+            newtri = tri.clone();
+            newtri.rotation += 60*(i+1);
+            newtri.speed = Math.floor(Math.random()*500)
+
+            triArray.push(newtri)
+
+        };
+
+        for (var i = triArray.length - 1; i >= 0; i--) {
+
+          // triArray[i].onTick = function () {
+          //     this.x+=this.speed
+          //   }
+
+          stage.addChild(triArray[i])
+
+            
+          // triArray[i].onMouseOver = pressHandler;
+
+         }; 
+
+      }
+      
+
+      function tick(){
+    
+        spawnFPS();
+        
+      !update ? stage.update() : null; 
+          
+        
+      }
+
+      function spawnGrid (rows,columns){
+
+        for (var r = rows - 1; r >= 0; r--) {
+          for (var c = columns - 1; c >= 0; c--) {
+             var hexArray = new Array() ;
+              hexArray.push(new Hexagon(c*triheight*2+(isEven(r) ? 0 : triheight), r*side*1.5));
+          };
+         
+
+        };
+
+      }
+
+function pressHandler(e){
+    var myTarget = e.target;
+    // createjs.Tween.get(e.target).to({x:100},1000);
+    update = false;
+    animcounter++
+    var tween = createjs.Tween.get(myTarget).to({y:-220, rotation:360, alpha:0, visible:false},1000).call(stopUpdate);
+    console.log(e.target instanceof createjs.DisplayObject)
+
+    }
+
+
+
+function hexToRgb(h)
+{
+    var r = parseInt((cutHex(h)).substring(0,2),16), g = ((cutHex(h)).substring(2,4),16), b = parseInt((cutHex(h)).substring(4,6),16)
+    return r+''+g+''+b;
+}
+
+function cutHex(h) {return (h.charAt(0)=="#") ? h.substring(1,7):h}
+
+function downloadImage () {
+
+    init();
+    var oCanvas = document.getElementById("my_canvas");
+    oCanvas.width = 1000;
+    oCanvas.height = 1000; 
+    init();
+    Canvas2Image.saveAsPNG(oCanvas);
+    spawnCanvas();
+    init();
+
+
+  }
+
+
+
+
+
+
+    </script>
+    </head>
+    <body>
+      <div id="wrapper" style="width:100%">
+        <header>
+        <h1>HexaGrid <sup>v0.1a</sup></h1>
+        <h2>An hexagonal pattern generator by <a href="http://twitter.com/HappyTorso" target="blank">@HappyTorso</a> - <a href="http://flakesix.com" target="blank">flakesix.com</a> </h2>
+        </header>
+          <div id="canvaswrapper">
+          </div>          
+        </div>
+         <div id="canvasoverlay"><button id="randombutton" onClick="javascript:Randomize()" data-role="button" class="k-button">Randomize!</button> </div>
+        <div id="fps"></div>
+        <div id="hexacontrols">
+                          <div class="controlpanel" id="colorpanel">
+                            <form><input type="text" id="color" name="color" value="#123456" /></form>
+                            <div id="colorpicker"></div>
+                          </div>
+                          <div class="controlpanel">
+                            <h3>Positioning</h3>
+                            <div class="sliderwrapper k-slider-wrap k-slider-buttons">
+                                <label for="xcompSlider">X variation</label>
+                                <input id="xcompSlider" class="slider" />
+                            </div>
+                              <div class="sliderwrapper">
+                                <label for="ycompSlider">Y variation</label>
+                                <input id="ycompSlider" class="slider" />
+                              </div>
+                                                        
+                          </div>
+                            <div class="controlpanel">
+                              <h3>Shapes</h3>
+                              <div class="sliderwrapper">
+                                <div class="checkholder">
+                                  <label for="radiusSlider">Radius</label>
+                                  <input id="gridcheck" value="true" type="checkbox"><label for="gridcheck">Retile Grid</label>
+                                </div>
+                                <input id="radiusSlider" class="slider" />
+                            </div>
+                            <div class="sliderwrapper">
+                              <label for="sidesSlider">Polygon sides</label>
+                              <input id="sidesSlider" class="slider" />
+                            </div>
+                            </div>
+            
+            
+            
+            
+            
+                        <script>
+                            function changeSides(e) {
+                                kendoConsole.log("Slide :: new slide value is: " + e.value);
+                                sides = e.value;
+                                init();
+                                
+            
+                            }
+                            function changeRadius(e) {
+                                kendoConsole.log("Slide :: new slide value is: " + e.value);
+                                radius = e.value;
+                                init();
+                                
+            
+                            }
+            
+                            function changeXcomp(e) {
+                                kendoConsole.log("Slide :: new slide value is: " + e.value);
+                                xcomp = e.value;
+                                init();
+            
+                            }
+            
+                            function changeYcomp(e) {
+                                kendoConsole.log("Slide :: new slide value is: " + e.value);
+                                ycomp = e.value;
+                                init();
+            
+                            }
+            
+                            function updateColor(color) {
+                               kendoConsole.log("Slide :: new color is: " +  hex2rgb(color));
+                               fill = hex2rgb(color);
+                               init();
+            
+                            }
+            
+                            function hex2rgb(hexStr){
+                 // note: hexStr should be #rrggbb
+                var hex = hexStr.slice(1,7)
+              
+                return ["0x"+hex];
+            }
+            
+            
+            
+                            $(document).ready(function() {
+            
+                            
+            
+                                $("#sidesSlider").kendoSlider({
+                                    slide: changeSides,
+                                    change: changeSides,
+                                    min: 3,
+                                    max: 8,
+                                    smallStep: 1,
+                                    largeStep: 1,
+                                    value: 3
+                                });
+                                $("#radiusSlider").kendoSlider({
+                                    slide: changeRadius,
+                                    change: changeRadius,
+                                    min: 8,
+                                    max: 30,
+                                    smallStep: 1,
+                                    largeStep: 10,
+                                    value: 18
+                                });
+                                $("#xcompSlider").kendoSlider({
+                                    slide: changeXcomp,
+                                    change: changeXcomp,
+                                    min: -10,
+                                    max: 10,
+                                    smallStep: 1,
+                                    largeStep: 10,
+                                    value: 0
+                                });
+                                $("#ycompSlider").kendoSlider({
+                                    slide: changeYcomp,
+                                    change: changeYcomp,
+                                    min: -10,
+                                    max: 10,
+                                    smallStep: 1,
+                                    largeStep: 10,
+                                    value: 0
+                                });
+                                 var mypicker = $.farbtastic('#colorpicker')
+                                 mypicker.linkTo(updateColor);
+                                 mypicker.setColor("#246cdb");
+            
+            
+            
+                            });
+                        </script>
+            
+                        <style>
+                          
+              
+                        </style>
+        
+                    <div id="sizepanel" class="controlpanel">
+                      <h3>Export</h3>
+                       <div style="margin-top: 7px;">
+                            <label for="pixels-h">Width</label>
+                            <input id="pixels-h" value="1000" min="32" max="6000" step="50" />
+                        </div>
+                        <div style="margin-top: 7px;">
+                            <label for="pixels-v">Height</label>
+                            <input id="pixels-v" value="1000" min="32" max="6000" step="50" />
+                        </div>
+                        <button id="downloadbtn" onClick="javascript:downloadImage()" data-role="button" class="k-button">Export Pattern</button> 
+        
+                    </div>
+        
+        
+                    <script>
+                        $(document).ready(function() {
+                            
+        
+                            // create NumericTextBox from input HTML element using custom format
+                            $("#pixels-h").kendoNumericTextBox({
+                                format: "# px"
+                            });
+                            $("#pixels-v").kendoNumericTextBox({
+                                format: "# px"
+                            });
+                        });
+                    </script>
+                  </div>
+            
+            
+
+    </body>
+    </html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+
+    <title>D3 TEST</title>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+
+    <script src="http://d3js.org/d3.v2.js"></script>
+
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+
+
+
+
+    <script type="text/javascript">
+	
+	data = new Array();
+
+	function reinit() {
+	
+	delete data;
+	data = new Array();
+
+
+	for (var i = 1020 - 1; i >= 0; i--) {
+    	data.push({x:Math.random()*1280,y:Math.random()*113,rot:Math.random()*720, scale:Math.random()*4})
+    };
+
+	d3.select("#mysvg").selectAll(".point")
+		.data(data)
+		.transition()
+      	.duration(750)
+		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ") rotate("+d.rot+") scale("+d.scale+")"; })
+
+
+	}
+
+
+
+    function init() {
+    	console.log("Initializing")
+
+    for (var i = 1020 - 1; i >= 0; i--) {
+    	data.push({x:Math.random()*1280,y:Math.random()*113})
+    };
+
+    d3.select("#mysvg").selectAll(".point")
+      .data(data)
+    	.enter().append("path")
+      .attr("class", "point")
+      .attr("d", d3.svg.symbol().type("triangle-up"))
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+    }
+
+
+     function Triangle(radius,stroke,alpha,lit) {
+        graphics = new createjs.Graphics();
+        graphics.beginFill(createjs.Graphics.getRGB(lit ? fillon : filloff,alpha));
+        graphics.drawPolyStar ( 0 , 0 , radius , 3 , 0 , -90 );
+        graphics.closePath();
+
+
+        return graphics;
+
+      }
+
+
+    </script>
+
+
+
+    <body onload="javascript:init();">
+
+
+    		<svg width="1280" height="113" id="mysvg"></svg>
+     <strong> <a href="#" id="reinit" onClick="javascript:reinit()">RETEST</a></strong>
+
+    </body>
+</HTML>

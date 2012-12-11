@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+
+    <title>D3 TEST</title>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+
+    <script src="http://d3js.org/d3.v2.min.js"></script>
+
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+
+
+    <script type="text/javascript">
+
+	
+
+  //GLOBAL WIRABLE VARS
+  var scope = this;
+
+  function resetVars() {
+      scope.debugmode = false;
+
+      scope.radius = 13;
+      scope.stroke = 2;
+      scope.on_color = "#000000";
+      scope.off_color = "#D6F5FF";
+      scope.alpha = 1;
+      scope.update = true;
+
+
+      scope.svgheight = 113 //HEIGHT OF THE SVG TO DRAW 
+      scope.side;
+      scope.inradius;
+      scope.counter = 0;
+
+
+      
+
+      //TRIANGLE RECENTERING CALCULATIONS
+      scope.side = 1/((Math.sqrt(3)/3)*1/radius);
+      scope.inradius = side*(Math.sqrt(3)/6);
+      scope.triheight = side*(Math.sqrt(3)/2)
+
+      scope.hexArray = [];
+      scope.randomProperties = [];
+      scope.myList = [];
+
+      scope.litArray = []; //CONTAINS COORDINATES OF LIT TRIANGLES
+
+      scope.triArray = [[0,0],[side,0],[side/2,triheight]]
+      scope.triangle_vertices = triArray.join("L");
+
+      scope.specArray = [
+                    {row:3, column:0, idx:4},
+                    {row:2, column:1, idx:2},
+                    {row:2, column:1, idx:1},
+                    {row:2, column:1, idx:3},
+                    {row:1, column:0, idx:0},
+                    {row:1, column:0, idx:5},
+                    {row:1, column:1, idx:3},
+                    {row:2, column:1, idx:4},
+                    {row:1, column:2, idx:3},
+                    {row:1, column:2, idx:2},
+                    {row:1, column:2, idx:1},
+                    {row:2, column:2, idx:4},
+                    {row:2, column:2, idx:5},
+                    {row:2, column:2, idx:0},
+                    {row:3, column:2, idx:3},
+                    {row:3, column:2, idx:4},
+                    {row:2, column:3, idx:1},
+                    {row:3, column:3, idx:4},
+                    {row:2, column:4, idx:2},
+                    {row:2, column:4, idx:1},
+                    {row:2, column:4, idx:3},
+                    {row:1, column:3, idx:0},
+                    {row:1, column:3, idx:5},
+                    {row:2, column:4, idx:4},
+                    {row:1, column:4, idx:3},
+                    {row:1, column:4, idx:4},
+                    {row:1, column:4, idx:5},
+                    {row:1, column:4, idx:0},
+                    {row:2, column:5, idx:3},
+                    {row:2, column:5, idx:2},
+                    {row:2, column:5, idx:1},
+                    {row:3, column:4, idx:4},
+                    {row:1, column:5, idx:4},
+                    {row:1, column:5, idx:5},
+                    {row:1, column:5, idx:0},
+                    {row:2, column:6, idx:3},
+                    {row:2, column:6, idx:2},
+                    {row:2, column:6, idx:1},
+                    {row:3, column:5, idx:4},
+                    {row:2, column:6, idx:4},
+                    {row:1, column:6, idx:0},
+                    {row:1, column:6, idx:5},
+                    {row:1, column:6, idx:4},
+                    {row:2, column:7, idx:2},
+                    {row:2, column:7, idx:1},
+                    {row:3, column:6, idx:4},
+                    {row:3, column:7, idx:4},
+                    {row:2, column:8, idx:2},
+                    {row:2, column:8, idx:1},
+                    {row:2, column:8, idx:3},
+                    {row:1, column:7, idx:0},
+                    {row:1, column:7, idx:5},
+                    {row:1, column:7, idx:4},
+                    {row:2, column:8, idx:4},
+                    {row:1, column:8, idx:3},
+                    {row:3, column:8, idx:3},
+                    {row:1, column:9, idx:1},
+                    {row:1, column:9, idx:2},
+                    {row:1, column:9, idx:4},
+                    {row:1, column:9, idx:3},
+                    {row:2, column:10, idx:2},
+                    {row:2, column:10, idx:1},
+                    {row:3, column:9, idx:4},
+                    {row:3, column:9, idx:3},
+                    {row:3, column:10, idx:4},
+                    {row:2, column:11, idx:1},
+                    {row:2, column:11, idx:2},
+                    {row:2, column:11, idx:3},
+                    {row:1, column:10, idx:0},
+                    {row:1, column:10, idx:4},
+                    {row:1, column:11, idx:4},
+                    {row:1, column:11, idx:5},
+                    {row:1, column:12, idx:2},
+                    {row:1, column:12, idx:3},
+                    {row:2, column:12, idx:4},
+                    {row:2, column:12, idx:3},
+                    {row:2, column:12, idx:1},
+                    {row:2, column:12, idx:0},
+                    {row:3, column:12, idx:3},
+                    {row:3, column:11, idx:4} 
+                    ];
+
+    }
+
+      IECompat(); //MAKE INDEXOF COMPATIBLE WITH IE
+      resetVars();
+
+
+      //DETECT A WINDOW RESIZE AND LAUNCH RESET
+      var doit;
+      function resizeDetected(){
+       resetVars();
+       reinit();
+        }
+      
+      $(window).resize(function() {
+        clearTimeout(doit);
+        doit = setTimeout(function() {
+         resizeDetected();
+        }, 300);
+      });
+
+  //DETERMINE IF NUMBER IS EVEN
+  function isEven(value) {
+       if (value%2 == 0)
+        return true;
+        else
+        return false;
+      }
+
+
+
+    function init() {
+    console.log("Initializing")
+    setSVG();
+    spawnGrid(vtiles,htiles);
+    setLitTriangles();
+    calcVars();
+    initPositions();
+    Animate();
+
+    }
+
+    //SAME AS INIT BUT TRIANGLES ARE SET TO FINAL POSITIONS
+    function reinit() {
+      console.log("Reinitializing")
+      setSVG();
+      spawnGrid(vtiles,htiles);
+      setLitTriangles();
+      calcVars();
+      resetPositions();
+    }
+
+
+
+    function setSVG() {
+
+        $("#my_svg").remove()
+
+        $("body").prepend("<div id='svgwrapper'><svg width='"+$(document).width()+"' height='"+svgheight+"' id='my_svg'></div>")
+
+        htiles = Math.ceil($("#my_svg").width()/(2*triheight)+1);
+        vtiles = Math.ceil(svgheight/(1.5*side));
+
+        console.log("H tiles: "+htiles+" V tiles: "+vtiles);
+
+
+      
+    }
+
+    function spawnGrid (rows,columns){
+
+        for (var r = rows - 1; r >= 0; r--) {
+          for (var c = columns - 1; c >= 0; c--) {
+            for (var ix = 6 - 1; ix >= 0; ix--) {
+              hexArray.push({x: c*triheight*2+(isEven(r) ? 0 : triheight), y: r*side*1.5, rot:60*ix+30, scale:1, row:r, column:c, idx:ix, color:off_color}); 
+            };
+          };
+         
+        };
+        
+       }
+
+    function setLitTriangles () {
+
+      specArray.forEach( function (item) {
+
+          var selected = hexArray.filter(function (el) {
+            return el.row === item.row &&
+            el.column === item.column &&
+            el.idx === item.idx
+          })[0];
+
+          selected.color = on_color;
+          // console.log(selected);
+        
+
+      })
+
+    }
+
+
+
+    function randomHexColor() {
+        var letters = '0123456789ABCDEF'.split('');
+        var color = '#';
+        for (var i = 0; i < 6; i++ ) {
+          color += letters[Math.round(Math.random() * 15)];
+        }
+      return color;
+    }
+
+    function calcVars() {
+
+        hexArray.forEach(function (item) {
+          randomProperties.push({
+            x:$(document).width()+5*side,
+            y:Math.random()*(svgheight+100)-100,
+            rot:Math.random()*(360*4), 
+            scale:Math.random()*5,
+            color: item['color'],
+            row:item['row'],
+            column:item['column'],
+            idx:item['idx']
+          })
+
+        })
+
+    }
+
+
+    function Animate() {
+     d3.select("svg").selectAll(".path")
+      .data(hexArray)
+      .transition()
+      .ease("back-out")
+      .duration(function(){return Math.random()*2000+300})
+      .delay(function(d,i){return 5*d.x})
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ") rotate("+d.rot+")"; })
+    }
+
+    function resetPositions () {
+      d3.select("#my_svg").selectAll()
+      .data(hexArray)
+      .enter().append("path")
+      .attr("class","path")
+      .attr("d", "M" + triangle_vertices + "Z" )
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ") rotate("+d.rot+") scale("+d.scale+")"; })
+      .attr("style", function(d){return "fill:"+d.color;})
+      .property("row", function(d) {return d.row})
+      .property("column", function(d) {return d.column})
+      .property("idx", function(d) {return d.idx})
+      .on("click", function () { 
+        toggleColor(this) 
+      })  
+
+    }
+
+    function initPositions () {
+      d3.select("#my_svg").selectAll()
+      .data(randomProperties)
+      .enter().append("path")
+      .attr("class","path")
+      .attr("d", "M" + triangle_vertices + "Z" )
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ") rotate("+d.rot+") scale("+d.scale+")"; })
+      .attr("style", function(d){return "fill:"+d.color;})
+      .property("row", function(d) {return d.row})
+      .property("column", function(d) {return d.column})
+      .property("idx", function(d) {return d.idx})
+      .on("click", function () { 
+        toggleColor(this) 
+      })  
+
+    }
+
+    function toggleColor(tg) {
+      var cl = d3.select(tg).attr("style").slice(5,12)
+      if(cl!=on_color) { 
+        d3.select(tg).attr("style", "fill:"+on_color); 
+        litArray.push({row:tg.row, column:tg.column, idx:tg.idx});
+        // console.log("pushing: "+tg.idx)
+      }else{
+        d3.select(tg).attr("style", "fill:"+off_color);
+          litArray.forEach(function (element) {
+            if(element.row === tg.row && element.column === tg.column && element.idx === tg.idx) {
+              litArray.splice(litArray.indexOf(element),1)
+              // console.log("splicing: "+tg.idx)
+
+            }
+          })
+        }
+    }
+
+
+    function PrintArray () {
+      litArray.forEach(function (item) {
+        console.log("{row:"+item.row+", column:"+item.column+", idx:"+item.idx+"},");
+      })
+    }
+
+
+    function IECompat () {
+      if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
+        "use strict";
+        if (this == null) {
+            throw new TypeError();
+        }
+        var t = Object(this);
+        var len = t.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        var n = 0;
+        if (arguments.length > 1) {
+            n = Number(arguments[1]);
+            if (n != n) { // shortcut for verifying if it's NaN
+                n = 0;
+            } else if (n != 0 && n != Infinity && n != -Infinity) {
+                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+            }
+        }
+        if (n >= len) {
+            return -1;
+        }
+        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+        for (; k < len; k++) {
+            if (k in t && t[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+      }
+    }
+  }
+
+    
+
+
+    </script>
+
+
+
+    <body onload="javascript:init();">
+    <h1>Flakesix Banner<sup>v0.1a</sup></h1>
+    <h2>An hexagonal tiling experiment by <a href="http://twitter.com/HappyTorso" target="blank">@HappyTorso</a> - <a href="http://flakesix.com" target="blank">flakesix.com</a> </h2>
+
+    </body>
+</HTML>

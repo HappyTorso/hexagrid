@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+
+    <title>EaselJS Demo</title>
+    <script type="text/javascript" src="easel.js"></script>
+    <script type="text/javascript" src="hexagon.js"></script>
+    <style type="text/css" media="screen">
+
+      #my_canvas{
+        background-color: gray;
+      }
+    </style>
+    <script type="text/javascript">
+      var stage;
+
+      var triangle;
+      var radius = 30;
+      var stroke = 1;
+      var fill = 0x000055;
+      var alpha = 0.8;
+      
+      var side;
+      var inradius;
+      var triArray = new Array();   
+      var counter = 0;
+
+
+      function init(){
+        
+        setStage();
+
+        
+        triArray.push(Triangle(radius,stroke,fill));
+
+        side = 1/((Math.sqrt(3)/3)*1/radius);
+        inradius = side*(Math.sqrt(3)/6);
+
+        console.log("inradius is: "+inradius);
+        console.log("side is: "+side);
+
+        triangle.regY = inradius;
+        triangle.regX = side/2;
+        triangle.x = canvas.width / 2;
+        triangle.y = canvas.height / 2;
+        // triangle.alpha = 0;
+        stage.addChild(triangle);
+        hegaxon(triangle, 5, 60);
+        console.log("Array is: "+triArray);
+
+        stage.update();
+        createjs.Ticker.setFPS(10);
+        createjs.Ticker.addListener(window);
+      }
+
+      function setStage(){
+        canvas = document.getElementById("my_canvas");
+        stage = new createjs.Stage(canvas);
+      }
+
+      function Triangle(radius,stroke,fill,alpha) {
+
+        graphics = new createjs.Graphics();
+        graphics.setStrokeStyle(stroke);
+        graphics.beginStroke(createjs.Graphics.getRGB(255,255,255,0.8));
+        graphics.beginFill(createjs.Graphics.getRGB(fill,alpha));
+        graphics.drawPolyStar ( 0 , 0 , radius , 3 , 0 , -90 );
+        graphics.closePath();
+        triangle = new createjs.Shape(graphics);
+        return triangle;
+
+      }
+
+      function hegaxon (tri, iterations, angle) {
+        for (var i = iterations - 1; i >= 0; i--) {
+            newtri = this['triangle'+i] 
+            newtri = tri.clone();
+            newtri.rotation += angle*(i+1);
+            triArray.push(newtri)
+            stage.addChild(newtri);
+
+        };
+
+      }
+      
+
+      function tick(){
+        // triArray[counter].alpha = 1;
+        // counter++;
+        stage.update();
+      }
+    </script>
+    </head>
+    <body onload="javascript:init();">
+
+    <canvas width="300" height="300" id="my_canvas"></canvas>
+    </body>
+    </html>
